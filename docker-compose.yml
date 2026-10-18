@@ -11,6 +11,7 @@ services:
       - PORT=2601
       - NODE_ENV=production
       - DATA_DIR=/app/data
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
     volumes:
       - ./data:/app/data

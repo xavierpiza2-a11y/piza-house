@@ -1,8 +1,6 @@
 import { FUNNY_EMOJIS, randItem, ts } from './constants';
 import { GameType, Question } from '../types';
 
-export const CLAUDE_WORKER_URL = 'https://blind-test.xavier-piza2.workers.dev';
-
 export const DEFAULT_PROMPTS = {
   interlude: `[SEED:{seed}] Manche {round} terminée. Bonne réponse : "{answer}".
 Joueurs ayant trouvé ({correct}/{total}) : {found}
@@ -53,17 +51,20 @@ Chaque commentaire est UNIQUE. Réponds TOUJOURS en JSON valide uniquement, sans
   } = options;
 
   try {
-    const r = await fetch(CLAUDE_WORKER_URL, {
+    const requestPayload = {
+      model: 'claude-sonnet-4-6',
+      max_tokens,
+      temperature,
+      system,
+      messages: [{ role: 'user', content: prompt }],
+    };
+
+    const r = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens,
-        temperature,
-        system,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+      body: JSON.stringify(requestPayload),
     });
+
     const data = await r.json();
     if (data.error) {
       console.error('Claude API error:', data.error);

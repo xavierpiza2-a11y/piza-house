@@ -29,7 +29,6 @@ self.addEventListener('fetch', e => {
     url.includes('googleapis') ||
     url.includes('deezer.com') ||
     url.includes('gstatic.com') ||
-    url.includes('workers.dev') ||
     url.includes('anthropic.com')
   ) {
     return; // Laisser passer sans interception

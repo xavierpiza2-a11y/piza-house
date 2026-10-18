@@ -397,7 +397,38 @@ apiRouter.get('/music/search', async (req: Request, res: Response) => {
   }
 });
 
+// ── CLAUDE / ANTHROPIC AI GENERATION PROXY ──
+apiRouter.post('/claude', async (req: Request, res: Response) => {
+  try {
+    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
+
+    if (!apiKey) {
+      return res.status(400).json({
+        error: "Clé ANTHROPIC_API_KEY non configurée. Définissez-la dans votre fichier .env pour activer la génération IA.",
+      });
+    }
+
+    // Appel direct sécurisé à l'API Anthropic
+    const upstream = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const data = await upstream.json();
+    return res.status(upstream.status).json(data);
+  } catch (err: any) {
+    console.error('[CLAUDE] Generation proxy error:', err);
+    res.status(500).json({ error: err.message || 'Échec de la communication avec l\'API Anthropic' });
+  }
+});
+
 // ── HEALTH CHECK ──
 apiRouter.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', time: Date.now() });
 });
+
