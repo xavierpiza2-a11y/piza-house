@@ -1,0 +1,8 @@
+{
+  "name": "Piza-House",
+  "description": "Soirée jeux en famille : blind test, quiz culture G, modes arcade chrono et multijoueur temps réel",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ],
+  "permissions": []
+}

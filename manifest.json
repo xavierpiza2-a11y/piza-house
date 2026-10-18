@@ -1,0 +1,25 @@
+{
+  "name": "Piza-House",
+  "short_name": "Piza-House",
+  "description": "Soirée jeux en famille : blind test, quiz et plus encore",
+  "start_url": "/blind-test/",
+  "scope": "/blind-test/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F07050",
+  "theme_color": "#F07050",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+services:
+  piza-house:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: piza-house
+    restart: unless-stopped
+    ports:
+      - "2601:2601"
+    environment:
+      - PORT=2601
+      - NODE_ENV=production
+      - DATA_DIR=/app/data
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2601/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
