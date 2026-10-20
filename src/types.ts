@@ -74,9 +74,7 @@ export interface UserProfile {
   isAdmin?: boolean;
   xp: number;
   stars?: number;
-  unlockedThemes?: string[];
   unlockedAvatars?: string[];
-  equippedTheme?: string;
   badges?: string[];
   stats?: UserStats;
 }
@@ -106,15 +104,6 @@ export interface Badge {
   icon: string;
   name: string;
   desc: string;
-}
-
-export interface ShopTheme {
-  id: string;
-  name: string;
-  price: number;
-  desc: string;
-  previewColor: string;
-  tag: string;
 }
 
 export interface DesignAvatar {

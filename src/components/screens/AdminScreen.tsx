@@ -248,7 +248,6 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ currentProfile, onBack
             {profiles.map((p) => {
               const lv = levelFor(p.xp);
               const stars = p.stars || 0;
-              const ths = (p.unlockedThemes || ['original']).length;
               const avs = (p.unlockedAvatars || []).length;
               const bdg = (p.badges || []).length;
               return (
@@ -266,7 +265,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ currentProfile, onBack
                       )}
                     </div>
                     <div className="a-item-meta">
-                      {lv.icon} {lv.name} · {p.xp || 0} XP · ⭐ {stars} · 🎨 {ths} · 🎭 {avs} · 🏆 {bdg}
+                      {lv.icon} {lv.name} · {p.xp || 0} XP · ⭐ {stars} · 🎭 {avs} · 🏆 {bdg}
                     </div>
                   </div>
                   <div className="flex gap-1.5">

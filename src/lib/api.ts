@@ -1,6 +1,9 @@
 import { AppConfig, Room, SavedGame, UserProfile } from '../types';
 
-export const ADMIN_EMAIL = 'xavier.piza2@gmail.com';
+export const ADMIN_EMAIL = (
+  (import.meta as any).env?.VITE_ADMIN_EMAIL ||
+  'xavier.piza2@gmail.com'
+).toLowerCase().trim();
 export const USERS_REF = 'users';
 export const CONFIG_REF = 'app/config';
 export const STATS_REF = 'app/stats';
@@ -15,7 +18,7 @@ export interface AuthUser {
   photoURL?: string;
 }
 
-// Global auth state management for GIS (Google Identity Services)
+// Global internal auth state management
 let currentUser: AuthUser | null = null;
 const authListeners = new Set<(user: AuthUser | null) => void>();
 
@@ -48,22 +51,21 @@ export function setAuthCurrentUser(user: AuthUser | null): void {
 
 export function onAuthStateChanged(cb: (user: AuthUser | null) => void): () => void {
   authListeners.add(cb);
-  // Emit immediately with current state
   cb(getAuthCurrentUser());
   return () => {
     authListeners.delete(cb);
   };
 }
 
-export async function loginWithGoogleCredential(credential: string): Promise<UserProfile> {
-  const res = await fetch(`${API_BASE}/auth/google`, {
+export async function loginWithEmail(email: string, name?: string, avatar?: string): Promise<UserProfile> {
+  const res = await fetch(`${API_BASE}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ credential }),
+    body: JSON.stringify({ email, name, avatar }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Connexion Google échouée');
+    throw new Error(err.error || 'Connexion échouée');
   }
   const data = await res.json();
   const authUser: AuthUser = {

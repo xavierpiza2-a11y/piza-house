@@ -12,7 +12,8 @@ services:
       - NODE_ENV=production
       - DATA_DIR=/app/data
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-xavier.piza2@gmail.com}
+      - VITE_ADMIN_EMAIL=${VITE_ADMIN_EMAIL:-xavier.piza2@gmail.com}
     volumes:
       - ./data:/app/data
     healthcheck:

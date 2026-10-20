@@ -4,7 +4,7 @@ import modeSurvieImg from './mode_survie_3d_1792246110117.jpg';
 import modeBlitzImg from './mode_blitz_3d_1792246176337.jpg';
 import trophyGoldImg from './trophy_gold_3d_1792246192636.jpg';
 
-// Avatars
+// Avatars 3D
 import avatarCatDjImg from './avatar_cat_dj_1792246206995.jpg';
 import avatarPizzaChefImg from './avatar_pizza_chef_1792246220726.jpg';
 import avatarCatRockstarImg from './avatar_cat_rockstar_1792312740447.jpg';
@@ -26,6 +26,13 @@ import bgMenuPizahouseImg from './bg_menu_pizahouse_1792312685935.jpg';
 import bgGameBlindtestImg from './bg_game_blindtest_1792312700677.jpg';
 import bgGameQuizImg from './bg_game_quiz_1792312713738.jpg';
 import bgGameArcadeImg from './bg_game_arcade_1792312726855.jpg';
+
+// Navigation Icons 3D
+import navHomeImg from './nav_home_3d_1792326416738.jpg';
+import navLeaderboardImg from './nav_leaderboard_3d_1792326428135.jpg';
+import navFriendsImg from './nav_friends_3d_1792326441599.jpg';
+import navShopImg from './nav_shop_3d_1792326453867.jpg';
+import navProfileImg from './nav_profile_3d_1792326466015.jpg';
 
 export {
   modeSpeedImg,
@@ -50,4 +57,9 @@ export {
   bgGameBlindtestImg,
   bgGameQuizImg,
   bgGameArcadeImg,
+  navHomeImg,
+  navLeaderboardImg,
+  navFriendsImg,
+  navShopImg,
+  navProfileImg,
 };

@@ -1,31 +1,31 @@
 import React from 'react';
 import { UserProfile } from '../../types';
-import { DESIGN_AVATARS, SHOP_THEMES } from '../../lib/constants';
+import { DESIGN_AVATARS } from '../../lib/constants';
 
 interface ShopScreenProps {
   profile: UserProfile | null;
   onOpenLogin: () => void;
-  onBuyItem: (type: 'theme' | 'avatar', id: string) => Promise<void>;
+  onBuyAvatar: (id: string) => Promise<void>;
 }
 
-export const ShopScreen: React.FC<ShopScreenProps> = ({ profile, onOpenLogin, onBuyItem }) => {
+export const ShopScreen: React.FC<ShopScreenProps> = ({ profile, onOpenLogin, onBuyAvatar }) => {
   if (!profile) {
     return (
       <div className="wrap">
         <div className="app-header">
           <div className="hdr-info">
-            <div className="hdr-name">🛒 Boutique</div>
-            <div className="hdr-hi">Débloque thèmes & avatars</div>
+            <div className="hdr-name">🛍️ Boutique Avatars 3D</div>
+            <div className="hdr-hi">Débloque des héros exclusifs</div>
           </div>
         </div>
         <div className="guest-banner mt-2">
           <h3>🔒 Connecte-toi pour accéder à la boutique</h3>
           <p>
-            Gagne des ⭐ étoiles en jouant rapidement et en faisant des séries pour débloquer des
-            thèmes animés et des avatars exclusifs !
+            Gagne des ⭐ étoiles en répondant rapidement et en alignant les bonnes réponses pour
+            collectionner tous les avatars 3D officiels de la Piza-House !
           </p>
           <button type="button" className="btn-signup" onClick={onOpenLogin}>
-            Continuer avec Google
+            ✨ Créer un compte ou se connecter
           </button>
         </div>
       </div>
@@ -33,78 +33,31 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({ profile, onOpenLogin, on
   }
 
   const stars = profile.stars || 0;
-  const equippedTheme = profile.equippedTheme || 'original';
-  const unlockedThemes = profile.unlockedThemes || ['original'];
-  const currentAvatar = profile.avatar || '🎵';
-  const unlockedAvatars = profile.unlockedAvatars || [];
+  const currentAvatar = profile.avatar || 'avatar_rockstar';
+  const unlockedAvatars = profile.unlockedAvatars || ['avatar_rockstar'];
 
   return (
     <div className="wrap">
       <div className="app-header">
         <div className="hdr-info">
-          <div className="hdr-name">🛒 Boutique</div>
-          <div className="hdr-hi">Thèmes animés & Avatars VIP</div>
+          <div className="hdr-name">🛍️ Boutique d'Avatars 3D</div>
+          <div className="hdr-hi">Personnages et Mascottes Officielles</div>
         </div>
         <div className="stars-badge">⭐ {stars}</div>
       </div>
 
       <div className="shop-header-card">
         <div>
-          <div className="font-black text-sm text-white">Comment gagner des ⭐ ?</div>
+          <div className="font-black text-sm text-white">Comment gagner des ⭐ étoiles ?</div>
           <div className="text-xs text-white/70 mt-1 leading-relaxed">
-            Réponses sous 3s (+3⭐) · Séries de 3, 5, 10 (+8 à +40⭐) · Podium (+10 à +30⭐)
+            Réponses en moins de 3s (+3⭐) · Séries de 3, 5, 10 (+8 à +40⭐) · Podiums (+10 à +30⭐)
           </div>
         </div>
       </div>
 
-      {/* Thèmes animés */}
+      {/* Collection Avatars 3D */}
       <div className="sect-title my-4 font-black text-base text-white">
-        🎨 Thèmes de Salle Animés
-      </div>
-      <div className="shop-grid">
-        {SHOP_THEMES.map((t) => {
-          const isUnlocked = unlockedThemes.includes(t.id);
-          const isEquipped = equippedTheme === t.id;
-          return (
-            <div key={t.id} className={`shop-card ${isEquipped ? 'equipped' : ''}`}>
-              <div className="shop-preview" style={{ background: t.previewColor }}>
-                🎨
-              </div>
-              <div className="shop-info">
-                <div className="shop-title">
-                  {t.name} <span className="shop-tag">{t.tag}</span>
-                </div>
-                <div className="shop-desc">{t.desc}</div>
-              </div>
-              {isEquipped ? (
-                <button type="button" className="shop-btn equipped">
-                  ✅ Équipé
-                </button>
-              ) : isUnlocked ? (
-                <button
-                  type="button"
-                  className="shop-btn activate"
-                  onClick={() => onBuyItem('theme', t.id)}
-                >
-                  Activer
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={`shop-btn buy ${stars < t.price ? 'locked' : ''}`}
-                  onClick={() => onBuyItem('theme', t.id)}
-                >
-                  ⭐ {t.price}
-                </button>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Avatars VIP */}
-      <div className="sect-title my-4 font-black text-base text-white">
-        🎭 Avatars Stylisés VIP
+        🎭 Collection d'Avatars 3D ({unlockedAvatars.length}/{Object.keys(DESIGN_AVATARS).length})
       </div>
       <div className="shop-grid">
         {Object.values(DESIGN_AVATARS).map((a) => {
@@ -135,7 +88,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({ profile, onOpenLogin, on
                 <button
                   type="button"
                   className="shop-btn activate"
-                  onClick={() => onBuyItem('avatar', a.id)}
+                  onClick={() => onBuyAvatar(a.id)}
                 >
                   Porter
                 </button>
@@ -143,7 +96,7 @@ export const ShopScreen: React.FC<ShopScreenProps> = ({ profile, onOpenLogin, on
                 <button
                   type="button"
                   className={`shop-btn buy ${stars < a.price ? 'locked' : ''}`}
-                  onClick={() => onBuyItem('avatar', a.id)}
+                  onClick={() => onBuyAvatar(a.id)}
                 >
                   ⭐ {a.price}
                 </button>

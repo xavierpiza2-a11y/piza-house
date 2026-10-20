@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
-import { BADGES, DESIGN_AVATARS, levelFor, SHOP_THEMES } from '../lib/constants';
+import { BADGES, DESIGN_AVATARS, levelFor } from '../lib/constants';
 import { AvatarDisplay } from './AvatarDisplay';
 
 interface AdminPlayerModalProps {
@@ -22,11 +22,6 @@ export const AdminPlayerModal: React.FC<AdminPlayerModalProps> = ({ isOpen, onCl
         ...player,
         xp: player.xp || 0,
         stars: player.stars || 0,
-        unlockedThemes: Array.isArray(player.unlockedThemes)
-          ? player.unlockedThemes.includes('original')
-            ? [...player.unlockedThemes]
-            : ['original', ...player.unlockedThemes]
-          : ['original'],
         unlockedAvatars: Array.isArray(player.unlockedAvatars) ? [...player.unlockedAvatars] : [],
         badges: Array.isArray(player.badges) ? [...player.badges] : [],
       });
@@ -41,25 +36,6 @@ export const AdminPlayerModal: React.FC<AdminPlayerModalProps> = ({ isOpen, onCl
 
   const addStars = (amount: number) => {
     setEditData((prev) => ({ ...prev, stars: Math.max(0, (prev.stars || 0) + amount) }));
-  };
-
-  const toggleTheme = (themeId: string) => {
-    if (themeId === 'original') return;
-    setEditData((prev) => {
-      const themes = prev.unlockedThemes || ['original'];
-      const exists = themes.includes(themeId);
-      return {
-        ...prev,
-        unlockedThemes: exists ? themes.filter((t) => t !== themeId) : [...themes, themeId],
-      };
-    });
-  };
-
-  const setAllThemes = (unlockAll: boolean) => {
-    setEditData((prev) => ({
-      ...prev,
-      unlockedThemes: unlockAll ? SHOP_THEMES.map((t) => t.id) : ['original'],
-    }));
   };
 
   const toggleAvatar = (avId: string) => {
@@ -200,53 +176,6 @@ export const AdminPlayerModal: React.FC<AdminPlayerModalProps> = ({ isOpen, onCl
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Thèmes */}
-        <div className="admin-section mb-3.5">
-          <div className="flex justify-between items-center mb-2">
-            <div className="admin-section-title mb-0">
-              🎨 Thèmes Débloqués ({(editData.unlockedThemes || []).length}/{SHOP_THEMES.length})
-            </div>
-            <div className="flex gap-1">
-              <button
-                type="button"
-                className="btn-sm btn-ghost text-[10px] py-1 px-1.5"
-                onClick={() => setAllThemes(true)}
-              >
-                Tout 🔓
-              </button>
-              <button
-                type="button"
-                className="btn-sm btn-ghost text-[10px] py-1 px-1.5"
-                onClick={() => setAllThemes(false)}
-              >
-                Reset 🔒
-              </button>
-            </div>
-          </div>
-          <div className="max-h-[150px] overflow-y-auto pr-1">
-            {SHOP_THEMES.map((t) => {
-              const isUnlocked = (editData.unlockedThemes || []).includes(t.id);
-              return (
-                <div
-                  key={t.id}
-                  className="flex items-center justify-between p-2 bg-white/5 rounded-xl mb-1.5"
-                >
-                  <div className="text-[13px] font-bold">
-                    {t.name} <span className="text-[10px] text-white/70">({t.tag})</span>
-                  </div>
-                  <button
-                    type="button"
-                    className={`btn-sm ${isUnlocked ? 'btn-danger' : 'btn-primary'} py-1 px-2.5 text-[11px]`}
-                    onClick={() => toggleTheme(t.id)}
-                  >
-                    {isUnlocked ? '❌ Retirer' : '➕ Débloquer'}
-                  </button>
-                </div>
-              );
-            })}
           </div>
         </div>
 

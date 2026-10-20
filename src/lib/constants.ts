@@ -1,4 +1,4 @@
-import { Badge, DesignAvatar, GameDefinition, GameType, LevelInfo, Room, ShopTheme } from '../types';
+import { Badge, DesignAvatar, GameDefinition, GameType, LevelInfo, Room } from '../types';
 import {
   avatarCatDjImg,
   avatarCatRockstarImg,
@@ -16,8 +16,7 @@ import {
 export const ANSWER_TIME = 20;
 export const CIRC = 2 * Math.PI * 22;
 
-export const AVATARS = ['🦁','🐯','🦊','🐸','🐧','🦋','🐉','🦄','🐺','🦈','🐻','🐼','🦅','🐬','🦉','🐙','🦖','🐝'];
-export const EMOJIS = ['🎵','🎸','🎹','🎺','🥁','🎤','🎧','🌟','🔥','💫','🦁','🐯','🦊','🐼','🦄','👑','🚀','😎','🎯','🍕','🎲','🎮'];
+export const EMOJIS = ['🎵','🎸','🎹','🎺','🥁','🎤','🎧','🌟','🔥','💫','👑','🚀','😎','🎯','🍕','🎲','🎮'];
 export const COLORS = ['#F5C518','#2ABFBF','#ec4899','#8b5cf6','#10b981','#3b82f6','#ef4444','#06b6d4','#a855f7','#f59e0b'];
 export const MEDALS = ['🥇','🥈','🥉'];
 export const FUNNY_EMOJIS = ['🤣','😭','🎯','🔥','💀','🤯','👻','🎸','🎺','🦜','🐸','🤦','😤','🥴'];
@@ -174,16 +173,6 @@ export const DESIGN_AVATARS: Record<string, DesignAvatar> = {
   },
 };
 
-export const SHOP_THEMES: ShopTheme[] = [
-  { id: 'original', name: 'Piza Saumon 🍕', price: 0, desc: 'Le thème classique et emblématique de la Piza-House.', previewColor: 'linear-gradient(135deg, #F07050, #E85D3A)', tag: 'Gratuit' },
-  { id: 'scintillant', name: 'Or Scintillant ✨', price: 300, desc: 'Fond violet d’or avec pluie d’étoiles et paillettes animées !', previewColor: 'linear-gradient(135deg, #2a1f45, #ffd700)', tag: 'Animé ✨' },
-  { id: 'neon', name: 'Néon Cyberpunk ⚡', price: 500, desc: 'Inspiration néon cyan & magenta futuriste.', previewColor: 'linear-gradient(135deg, #0f172a, #ec4899)', tag: 'Lumière 💡' },
-  { id: 'sunset', name: 'Sunset Synthwave 🌅', price: 700, desc: 'Dégradé crépusculaire violet & orange californien.', previewColor: 'linear-gradient(135deg, #2e1065, #f43f5e)', tag: 'Chaud 🔥' },
-  { id: 'cosmic', name: 'Galaxie Cosmique 🌌', price: 900, desc: 'Plongée dans les profondeurs de l’espace sidéral.', previewColor: 'linear-gradient(135deg, #030712, #6366f1)', tag: 'Mystic 🔮' },
-  { id: 'disco', name: 'Disco Rétro 80s 🕺', price: 1200, desc: 'Animation dégradée arc-en-ciel multicolore en mouvement !', previewColor: 'linear-gradient(135deg, #4c1d95, #065f46)', tag: 'Animé ✨' },
-  { id: 'gold', name: 'Luxe & Diamant 💎', price: 1500, desc: 'Réservé à l’élite. Finition sombre impériale aux accents d’or.', previewColor: 'linear-gradient(135deg, #292524, #eab308)', tag: 'Prestige 🏆' },
-];
-
 export const BADGES: Badge[] = [
   { id: 'first_game', icon: '🎵', name: 'Première Note', desc: 'Participer à sa 1ère partie.' },
   { id: 'perfect_game', icon: '💯', name: 'Sans Faute !', desc: '100% de bonnes réponses dans 1 partie.' },
@@ -201,7 +190,6 @@ export const BADGES: Badge[] = [
   { id: 'star_collector_50', icon: '⭐', name: 'Petite Étoile', desc: 'Cumuler 50 étoiles.' },
   { id: 'star_collector_300', icon: '🌌', name: 'Constellation', desc: 'Cumuler 300 étoiles.' },
   { id: 'shopaholic', icon: '🛒', name: 'Fashion Victim', desc: 'Acheter un article en boutique.' },
-  { id: 'theme_collector', icon: '🎨', name: 'Décorateur', desc: 'Posséder 3 thèmes de salle.' },
   { id: 'avatar_vip', icon: '🎭', name: 'Look VIP', desc: 'Posséder un avatar stylisé.' },
   { id: 'level_10', icon: '🎖️', name: 'Niveau 10', desc: 'Atteindre le Niveau 10.' },
   { id: 'level_25', icon: '💎', name: 'Légende Vivante', desc: 'Atteindre le Niveau 25.' },
@@ -252,7 +240,8 @@ export function genCode(): string {
 }
 
 export function randAvatar(): string {
-  return AVATARS[Math.floor(Math.random() * AVATARS.length)];
+  const keys = Object.keys(DESIGN_AVATARS);
+  return keys[Math.floor(Math.random() * keys.length)] || 'avatar_rockstar';
 }
 
 export function randItem<T>(a: T[]): T {

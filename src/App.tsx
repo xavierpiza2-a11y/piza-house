@@ -17,7 +17,7 @@ import {
   STATS_REF,
   USERS_REF,
 } from './lib/api';
-import { GoogleAuthModal } from './components/GoogleAuthModal';
+import { AuthModal } from './components/AuthModal';
 import {
   bgGameArcadeImg,
   bgGameBlindtestImg,
@@ -42,7 +42,6 @@ import {
   levelFor,
   randAvatar,
   randomColor,
-  SHOP_THEMES,
   ts,
 } from './lib/constants';
 import { playAudioEffect } from './lib/audio';
@@ -105,7 +104,7 @@ export const App: React.FC = () => {
   const [confettiTrigger, setConfettiTrigger] = useState(0);
   const [soundboardOpen, setSoundboardOpen] = useState(false);
   const [userProfileModalOpen, setUserProfileModalOpen] = useState(false);
-  const [googleAuthModalOpen, setGoogleAuthModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [savedModalOpen, setSavedModalOpen] = useState(false);
   const [deezerModalOpen, setDeezerModalOpen] = useState(false);
   const [deezerQIndex, setDeezerQIndex] = useState(0);
@@ -130,32 +129,31 @@ export const App: React.FC = () => {
       if (user) {
         setCurrentUser(user);
         const existing = await dbGet<UserProfile>(`${USERS_REF}/${user.uid}`);
+        const userEmail = (user.email || '').toLowerCase().trim();
+        const isAdmin = userEmail === ADMIN_EMAIL.toLowerCase().trim();
+
         if (!existing) {
-          const isAdmin = user.email === ADMIN_EMAIL;
           const newProfile: UserProfile = {
             uid: user.uid,
-            email: user.email || '',
-            name: user.displayName || user.email?.split('@')[0] || 'Joueur',
+            email: userEmail,
+            name: user.displayName || userEmail.split('@')[0] || 'Joueur',
             photoURL: user.photoURL || '',
             customPhoto: '',
             color: isAdmin ? '#F5C518' : randomColor(),
-            avatar: '🎵',
+            avatar: 'avatar_rockstar',
             isAdmin,
             xp: 0,
-            stars: 0,
-            unlockedThemes: ['original'],
-            unlockedAvatars: [],
-            equippedTheme: 'original',
+            stars: 50,
+            unlockedAvatars: ['avatar_rockstar'],
             badges: [],
             stats: { games: 0, correct: 0, answered: 0, best: 0 },
           };
           await dbSet(`${USERS_REF}/${user.uid}`, newProfile);
           setProfile(newProfile);
-          applyTheme(newProfile.equippedTheme);
         } else {
-          if (user.email === ADMIN_EMAIL && !existing.isAdmin) {
-            existing.isAdmin = true;
-            await dbSet(`${USERS_REF}/${user.uid}/isAdmin`, true);
+          if (existing.isAdmin !== isAdmin) {
+            existing.isAdmin = isAdmin;
+            await dbSet(`${USERS_REF}/${user.uid}/isAdmin`, isAdmin);
           }
           if (existing.xp === undefined) {
             existing.xp = 0;
@@ -165,16 +163,11 @@ export const App: React.FC = () => {
             existing.stars = 0;
             await dbSet(`${USERS_REF}/${user.uid}/stars`, 0);
           }
-          if (!existing.unlockedThemes) {
-            existing.unlockedThemes = ['original'];
-            await dbSet(`${USERS_REF}/${user.uid}/unlockedThemes`, ['original']);
-          }
           if (!existing.badges) {
             existing.badges = [];
             await dbSet(`${USERS_REF}/${user.uid}/badges`, []);
           }
           setProfile(existing);
-          applyTheme(existing.equippedTheme);
         }
         await dbSet(`${STATS_REF}/lastLogin`, {
           name: existing?.name || user.displayName || 'Utilisateur',
@@ -183,7 +176,6 @@ export const App: React.FC = () => {
       } else {
         setCurrentUser(null);
         setProfile(null);
-        applyTheme('original');
       }
 
       // Check session for reconnection
@@ -202,35 +194,28 @@ export const App: React.FC = () => {
     return () => unsub();
   }, []);
 
-  const applyTheme = (themeId?: string) => {
-    const tid = themeId || 'original';
-    document.body.className = tid !== 'original' ? `theme-${tid}` : '';
-  };
-
   const myIdentity = () => {
     if (currentUser && profile) {
       return {
         id: 'u' + currentUser.uid,
         name: profile.name,
-        avatar: profile.avatar || '🎵',
+        avatar: profile.avatar || 'avatar_rockstar',
         color: profile.color || '#F5C518',
         photoURL: profile.customPhoto || profile.photoURL || '',
         connected: true,
         lvl: levelFor(profile.xp).icon,
         stars: profile.stars || 0,
-        equippedTheme: profile.equippedTheme || 'original',
       };
     }
     return {
       id: guest.id,
       name: guest.name || 'Invité',
-      avatar: guest.avatar || randAvatar(),
+      avatar: guest.avatar || 'avatar_rockstar',
       color: '#1A1A2E',
       photoURL: '',
       connected: false,
       guest: true,
       stars: 0,
-      equippedTheme: 'original',
     };
   };
 
@@ -499,16 +484,15 @@ export const App: React.FC = () => {
     setXpToastHtml(baseToast + badgeToast);
   };
 
-  // Google Login
-  const handleGoogleLogin = () => {
-    setGoogleAuthModalOpen(true);
+  // User Login / Signup
+  const handleOpenLogin = () => {
+    setAuthModalOpen(true);
   };
 
   const handleLogout = async () => {
     await logoutUser();
     setCurrentUser(null);
     setProfile(null);
-    applyTheme('original');
     setCurrentTab('home');
     setScreen('home');
   };
@@ -805,63 +789,37 @@ export const App: React.FC = () => {
     await dbSet(`rooms/${roomCode}/scores/${player.id}`, currentScore + pts);
   };
 
-  // Shop purchase
-  const handleBuyShopItem = async (type: 'theme' | 'avatar', id: string) => {
+  // Shop avatar purchase / equip
+  const handleBuyAvatar = async (id: string) => {
     if (!currentUser || !profile) {
-      alert('Connecte-toi pour faire des achats dans la boutique !');
+      setAuthModalOpen(true);
       return;
     }
     const userStars = profile.stars || 0;
-    let item: any = null;
-    if (type === 'theme') item = SHOP_THEMES.find((t) => t.id === id);
-    if (type === 'avatar') item = DESIGN_AVATARS[id];
+    const item = DESIGN_AVATARS[id];
     if (!item) return;
 
-    const unlockedThemes = profile.unlockedThemes || ['original'];
-    const unlockedAvatars = profile.unlockedAvatars || [];
-    const isUnlocked = type === 'theme' ? unlockedThemes.includes(id) : unlockedAvatars.includes(id);
+    const unlockedAvatars = profile.unlockedAvatars || ['avatar_rockstar'];
+    const isUnlocked = unlockedAvatars.includes(id);
 
     if (isUnlocked) {
-      if (type === 'theme') {
-        await dbSet(`${USERS_REF}/${currentUser.uid}/equippedTheme`, id);
-        const updated = { ...profile, equippedTheme: id };
-        setProfile(updated);
-        applyTheme(id);
-      } else {
-        await dbSet(`${USERS_REF}/${currentUser.uid}/avatar`, id);
-        const updated = { ...profile, avatar: id };
-        setProfile(updated);
-      }
+      await dbSet(`${USERS_REF}/${currentUser.uid}/avatar`, id);
+      const updated = { ...profile, avatar: id };
+      setProfile(updated);
       return;
     }
 
     if (userStars < item.price) {
-      alert(
-        `Il te manque ${item.price - userStars} ⭐ étoiles pour débloquer cet article ! Joue des parties pour en gagner.`
-      );
       return;
     }
 
-    if (!confirm(`Acheter "${item.name}" pour ${item.price} ⭐ étoiles ?`)) return;
-
     const newStars = userStars - item.price;
-    if (type === 'theme') {
-      const newUnlocked = [...unlockedThemes, id];
-      await dbSet(`${USERS_REF}/${currentUser.uid}/unlockedThemes`, newUnlocked);
-      await dbSet(`${USERS_REF}/${currentUser.uid}/equippedTheme`, id);
-      await dbSet(`${USERS_REF}/${currentUser.uid}/stars`, newStars);
-      const updated = { ...profile, unlockedThemes: newUnlocked, equippedTheme: id, stars: newStars };
-      setProfile(updated);
-      applyTheme(id);
-    } else {
-      const newUnlocked = [...unlockedAvatars, id];
-      await dbSet(`${USERS_REF}/${currentUser.uid}/unlockedAvatars`, newUnlocked);
-      await dbSet(`${USERS_REF}/${currentUser.uid}/avatar`, id);
-      await dbSet(`${USERS_REF}/${currentUser.uid}/stars`, newStars);
-      const updated = { ...profile, unlockedAvatars: newUnlocked, avatar: id, stars: newStars };
-      setProfile(updated);
-    }
-
+    const newUnlocked = [...unlockedAvatars, id];
+    await dbSet(`${USERS_REF}/${currentUser.uid}/unlockedAvatars`, newUnlocked);
+    await dbSet(`${USERS_REF}/${currentUser.uid}/avatar`, id);
+    await dbSet(`${USERS_REF}/${currentUser.uid}/stars`, newStars);
+    const updated = { ...profile, unlockedAvatars: newUnlocked, avatar: id, stars: newStars };
+    setProfile(updated);
     setConfettiTrigger(Date.now());
   };
 
@@ -879,13 +837,11 @@ export const App: React.FC = () => {
   const handleAdminSavePlayer = async (updated: UserProfile) => {
     await dbSet(`${USERS_REF}/${updated.uid}/xp`, updated.xp);
     await dbSet(`${USERS_REF}/${updated.uid}/stars`, updated.stars);
-    await dbSet(`${USERS_REF}/${updated.uid}/unlockedThemes`, updated.unlockedThemes);
     await dbSet(`${USERS_REF}/${updated.uid}/unlockedAvatars`, updated.unlockedAvatars);
     await dbSet(`${USERS_REF}/${updated.uid}/badges`, updated.badges);
 
     if (currentUser && updated.uid === currentUser.uid) {
       setProfile(updated);
-      applyTheme(updated.equippedTheme);
     }
   };
 
@@ -987,8 +943,11 @@ export const App: React.FC = () => {
       );
     }
 
-    // Admin Screen
+    // Admin Screen (Restricted strictly to configured ADMIN_EMAIL)
     if (screen === 'admin') {
+      if (!profile?.isAdmin) {
+        return null;
+      }
       return (
         <AdminScreen
           currentProfile={profile}
@@ -1010,7 +969,7 @@ export const App: React.FC = () => {
         return (
           <LeaderboardScreen
             currentUid={currentUser?.uid}
-            onOpenLogin={handleGoogleLogin}
+            onOpenLogin={handleOpenLogin}
           />
         );
       case 'friends':
@@ -1019,17 +978,19 @@ export const App: React.FC = () => {
         return (
           <ShopScreen
             profile={profile}
-            onOpenLogin={handleGoogleLogin}
-            onBuyItem={handleBuyShopItem}
+            onOpenLogin={handleOpenLogin}
+            onBuyAvatar={handleBuyAvatar}
           />
         );
       case 'profile':
         return (
           <ProfileScreen
             profile={profile}
-            onOpenLogin={handleGoogleLogin}
+            onOpenLogin={handleOpenLogin}
             onOpenEditProfile={() => setUserProfileModalOpen(true)}
-            onOpenAdmin={() => setScreen('admin')}
+            onOpenAdmin={() => {
+              if (profile?.isAdmin) setScreen('admin');
+            }}
             onLogout={handleLogout}
           />
         );
@@ -1044,7 +1005,7 @@ export const App: React.FC = () => {
               if (profile) setCurrentTab('profile');
               else setUserProfileModalOpen(true);
             }}
-            onOpenLogin={handleGoogleLogin}
+            onOpenLogin={handleOpenLogin}
             onOpenHost={handleOpenHost}
             onJoinRoom={handleJoinRoom}
             session={session}
@@ -1110,17 +1071,15 @@ export const App: React.FC = () => {
         profile={profile}
         onProfileUpdated={(updated) => {
           setProfile(updated);
-          applyTheme(updated.equippedTheme);
         }}
       />
 
-      {/* Google Identity Services Auth Modal */}
-      <GoogleAuthModal
-        isOpen={googleAuthModalOpen}
-        onClose={() => setGoogleAuthModalOpen(false)}
+      {/* Native Internal Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
         onSuccess={(updated) => {
           setProfile(updated);
-          applyTheme(updated.equippedTheme);
         }}
       />
 

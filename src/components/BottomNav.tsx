@@ -1,4 +1,11 @@
 import React from 'react';
+import {
+  navFriendsImg,
+  navHomeImg,
+  navLeaderboardImg,
+  navProfileImg,
+  navShopImg,
+} from '../assets/images';
 
 export type TabType = 'home' | 'leaderboard' | 'friends' | 'shop' | 'profile';
 
@@ -18,7 +25,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onChangeTab, i
         className={`nav-tab ${currentTab === 'home' ? 'active' : ''}`}
         onClick={() => onChangeTab('home')}
       >
-        <span className="ico">🏠</span>
+        <span className="ico">
+          <img src={navHomeImg} alt="Accueil" />
+        </span>
         <span>Accueil</span>
       </button>
 
@@ -27,7 +36,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onChangeTab, i
         className={`nav-tab ${currentTab === 'leaderboard' ? 'active' : ''}`}
         onClick={() => onChangeTab('leaderboard')}
       >
-        <span className="ico">📊</span>
+        <span className="ico">
+          <img src={navLeaderboardImg} alt="Classement" />
+        </span>
         <span>Classement</span>
       </button>
 
@@ -36,7 +47,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onChangeTab, i
         className={`nav-tab ${currentTab === 'friends' ? 'active' : ''}`}
         onClick={() => onChangeTab('friends')}
       >
-        <span className="ico">👥</span>
+        <span className="ico">
+          <img src={navFriendsImg} alt="Amis" />
+        </span>
         <span>Amis</span>
       </button>
 
@@ -45,7 +58,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onChangeTab, i
         className={`nav-tab ${currentTab === 'shop' ? 'active' : ''}`}
         onClick={() => onChangeTab('shop')}
       >
-        <span className="ico">🛒</span>
+        <span className="ico">
+          <img src={navShopImg} alt="Boutique" />
+        </span>
         <span>Boutique</span>
       </button>
 
@@ -54,7 +69,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onChangeTab, i
         className={`nav-tab ${currentTab === 'profile' ? 'active' : ''}`}
         onClick={() => onChangeTab('profile')}
       >
-        <span className="ico">👤</span>
+        <span className="ico">
+          <img src={navProfileImg} alt="Profil" />
+        </span>
         <span>Profil</span>
       </button>
     </nav>

@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
-import { OAuth2Client } from 'google-auth-library';
 import {
   deleteRoom,
   deleteSavedGame,
@@ -23,8 +22,11 @@ import { Answer, Player, Room, UserProfile } from '../types';
 
 export const apiRouter = Router();
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
-const oauth2Client = new OAuth2Client(GOOGLE_CLIENT_ID);
+const ADMIN_EMAIL = (
+  process.env.ADMIN_EMAIL ||
+  process.env.VITE_ADMIN_EMAIL ||
+  'xavier.piza2@gmail.com'
+).toLowerCase().trim();
 
 // Multer storage for profile photos in data/uploads
 const storage = multer.diskStorage({
@@ -48,89 +50,50 @@ function getParam(param: string | string[] | undefined): string {
   return param || '';
 }
 
-// Helper to decode JWT token payload safely if client ID isn't verified or in local dev
-function decodeJwtPayload(token: string): { sub: string; email?: string; name?: string; picture?: string } | null {
+// ── AUTHENTICATION INTERNE PAR EMAIL (SANS GOOGLE) ──
+apiRouter.post('/auth/login', async (req: Request, res: Response) => {
   try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    const payload = Buffer.from(parts[1], 'base64').toString('utf-8');
-    return JSON.parse(payload);
-  } catch {
-    return null;
-  }
-}
-
-// ── AUTHENTICATION WITH GOOGLE IDENTITY SERVICES ──
-apiRouter.post('/auth/google', async (req: Request, res: Response) => {
-  try {
-    const { credential } = req.body;
-    if (!credential) {
-      return res.status(400).json({ error: 'Credential token is required' });
+    const { email, name, avatar } = req.body;
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({ error: 'Une adresse email valide est requise.' });
     }
 
-    let payload: { sub: string; email?: string; name?: string; picture?: string } | null = null;
-
-    if (GOOGLE_CLIENT_ID) {
-      try {
-        const ticket = await oauth2Client.verifyIdToken({
-          idToken: credential,
-          audience: GOOGLE_CLIENT_ID,
-        });
-        const ticketPayload = ticket.getPayload();
-        if (ticketPayload) {
-          payload = {
-            sub: ticketPayload.sub,
-            email: ticketPayload.email,
-            name: ticketPayload.name,
-            picture: ticketPayload.picture,
-          };
-        }
-      } catch (verifyErr) {
-        console.warn('[AUTH] Google token verification with client ID failed, using payload decoding:', verifyErr);
-        payload = decodeJwtPayload(credential);
-      }
-    } else {
-      payload = decodeJwtPayload(credential);
-    }
-
-    if (!payload || !payload.sub) {
-      return res.status(401).json({ error: 'Invalid Google credential token' });
-    }
-
-    const uid = payload.sub;
-    const email = payload.email || '';
-    const name = payload.name || 'Joueur Google';
-    const photoURL = payload.picture || '';
-    const isAdmin = email.toLowerCase() === 'xavier.piza2@gmail.com';
+    const cleanEmail = email.toLowerCase().trim();
+    // Identifiant déterministe basé sur l'adresse email
+    const uid = 'u_' + Buffer.from(cleanEmail).toString('base64').replace(/=/g, '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 24);
+    const isAdmin = cleanEmail === ADMIN_EMAIL;
 
     let user = await getUser(uid);
     if (!user) {
+      // Création de compte automatique
       user = {
         uid,
-        email,
-        name,
-        photoURL,
-        avatar: '🦁',
+        email: cleanEmail,
+        name: (name && String(name).trim()) || cleanEmail.split('@')[0],
+        photoURL: '',
+        avatar: avatar || 'avatar_rockstar',
         isAdmin,
         xp: 0,
-        stars: 0,
-        unlockedThemes: ['original'],
-        unlockedAvatars: [],
-        equippedTheme: 'original',
+        stars: 50,
+        unlockedAvatars: ['avatar_rockstar'],
         badges: [],
         stats: { games: 0, correct: 0, answered: 0, best: 0 },
       };
     } else {
-      user.name = user.name || name;
-      user.photoURL = user.photoURL || photoURL;
-      if (isAdmin) user.isAdmin = true;
+      if (name && String(name).trim()) {
+        user.name = String(name).trim();
+      }
+      if (avatar) {
+        user.avatar = avatar;
+      }
+      user.isAdmin = isAdmin;
     }
 
     await saveUser(user);
-    res.json({ user, token: credential });
+    res.json({ user, token: `token_${uid}_${Date.now()}` });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Auth failed';
-    console.error('[AUTH] Google auth error:', err);
+    const message = err instanceof Error ? err.message : 'Échec de connexion';
+    console.error('[AUTH] Internal login error:', err);
     res.status(500).json({ error: message });
   }
 });
