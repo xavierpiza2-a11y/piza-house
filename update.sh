@@ -2,7 +2,7 @@
 # ═══════════════════════════════════════════════════════════════════════
 # 🍕 Piza-House — Script de Mise à Jour Automatique en 1 Commande
 # Sécurisation absolue : Sauvegarde automatique de data/ avant tout git pull
-# Port actif : 2601
+# Port actif : 5640
 # ═══════════════════════════════════════════════════════════════════════
 
 set -euo pipefail
@@ -50,16 +50,17 @@ if [ -d ".git" ]; then
   CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
   echo -e "Branche active : ${YELLOW}${CURRENT_BRANCH}${NC}"
   
-  # On s'assure que data/ est bien ignoré et intact
+  # Réinitialise les fichiers suivis (comme package.json) pour éviter les conflits de merge
+  # Les fichiers non suivis (.env, dossier data/, sauvegardes) restent totalement intacts
   git fetch origin "$CURRENT_BRANCH"
-  git pull origin "$CURRENT_BRANCH"
-  echo -e "${GREEN}✓ Code source mis à jour avec succès.${NC}"
+  git reset --hard "origin/$CURRENT_BRANCH"
+  echo -e "${GREEN}✓ Code source synchronisé avec succès avec GitHub.${NC}"
 else
   echo -e "${YELLOW}Dossier .git non détecté. Passage à la recompilation Docker...${NC}"
 fi
 
 # 3. Recompilation et redémarrage du conteneur Docker (sans interruption)
-echo -e "${BLUE}[3/4] Recompilation et redémarrage du conteneur (Port 2601)...${NC}"
+echo -e "${BLUE}[3/4] Recompilation et redémarrage du conteneur (Port 5640)...${NC}"
 $COMPOSE_CMD up -d --build
 
 # Nettoyage des anciennes images inutilisées
@@ -73,12 +74,12 @@ LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "localhost")
 
 echo ""
 echo -e "${GREEN}==========================================================${NC}"
-echo -e "${GREEN}    ✓ MISE À JOUR TERMINÉE AVEC SUCCÈS ! (PORT 2601)      ${NC}"
+echo -e "${GREEN}    ✓ MISE À JOUR TERMINÉE AVEC SUCCÈS ! (PORT 5640)      ${NC}"
 echo -e "${GREEN}==========================================================${NC}"
 echo -e "Données protégées : ${GREEN}Toutes vos données (users, rooms, saved) ont été préservées intactes.${NC}"
 echo -e "Archive de secours : ${YELLOW}${BACKUP_FILE}${NC}"
 echo ""
 echo -e "Accès direct :"
-echo -e "  👉 Local :       ${BLUE}http://localhost:2601${NC}"
-echo -e "  👉 Réseau local : ${BLUE}http://${LOCAL_IP}:2601${NC}"
+echo -e "  👉 Local :       ${BLUE}http://localhost:5640${NC}"
+echo -e "  👉 Réseau local : ${BLUE}http://${LOCAL_IP}:5640${NC}"
 echo ""

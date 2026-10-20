@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════════════
 # 🍕 Piza-House — Script de Première Installation (Ubuntu / Docker)
-# Port configuré : 2601
+# Port configuré : 5640
 # Persistance des données : ./data/
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -66,19 +66,19 @@ echo -e "${GREEN}Dossiers persistants 'data/' et 'backups/' prêts.${NC}"
 if [ ! -f .env ]; then
   echo -e "${BLUE}[4/5] Création du fichier de configuration .env...${NC}"
   cat <<EOF > .env
-PORT=2601
+PORT=5640
 NODE_ENV=production
 DATA_DIR=/app/data
-# Optionnel : Ajoutez votre Google Client ID si vous souhaitez restreindre l'audience GIS
-GOOGLE_CLIENT_ID=
+ADMIN_EMAIL=xavier.piza2@gmail.com
+VITE_ADMIN_EMAIL=xavier.piza2@gmail.com
 EOF
-  echo -e "${GREEN}Fichier .env généré (Port 2601).${NC}"
+  echo -e "${GREEN}Fichier .env généré (Port 5640).${NC}"
 else
   echo -e "${GREEN}Fichier .env existant conservé.${NC}"
 fi
 
 # 5. Construction et lancement du conteneur Docker
-echo -e "${BLUE}[5/5] Construction de l'image Docker et démarrage sur le port 2601...${NC}"
+echo -e "${BLUE}[5/5] Construction de l'image Docker et démarrage sur le port 5640...${NC}"
 $COMPOSE_CMD up -d --build
 
 # Récupération de l'adresse IP locale / publique
@@ -90,8 +90,8 @@ echo -e "${GREEN}       🎉 PIZA-HOUSE EST INSTALLÉ ET OPÉRATIONNEL !       $
 echo -e "${GREEN}==========================================================${NC}"
 echo ""
 echo -e "Accédez à votre application :"
-echo -e "  👉 Local :       ${BLUE}http://localhost:2601${NC}"
-echo -e "  👉 Réseau local : ${BLUE}http://${LOCAL_IP}:2601${NC}"
+echo -e "  👉 Local :       ${BLUE}http://localhost:5640${NC}"
+echo -e "  👉 Réseau local : ${BLUE}http://${LOCAL_IP}:5640${NC}"
 echo ""
 echo -e "Commandes utiles :"
 echo -e "  • Voir les logs en direct :  ${YELLOW}$COMPOSE_CMD logs -f${NC}"

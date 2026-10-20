@@ -9,8 +9,8 @@ import { apiRouter } from './src/server/routes';
 async function startServer() {
   const app = express();
   const isProd = process.env.NODE_ENV === 'production';
-  // Allow user-specified port, default to 2601 in production / docker, or 3000 in dev
-  const PORT = Number(process.env.PORT) || (isProd ? 2601 : 3000);
+  // Allow user-specified port, default to 5640 in production / docker, or 3000 in dev
+  const PORT = Number(process.env.PORT) || (isProd ? 5640 : 3000);
 
   // Initialize JSON database in data/
   await initDatabase();
@@ -38,8 +38,12 @@ async function startServer() {
     const distPath = path.resolve(process.cwd(), 'dist');
     if (fs.existsSync(distPath)) {
       app.use(express.static(distPath));
-      app.get('*', (_req, res) => {
-        res.sendFile(path.join(distPath, 'index.html'));
+      // Fallback SPA middleware (Express 5 compatible, avoiding invalid '*' route pattern)
+      app.use((req, res, next) => {
+        if (req.method === 'GET' && !req.path.startsWith('/api')) {
+          return res.sendFile(path.join(distPath, 'index.html'));
+        }
+        next();
       });
     } else {
       console.warn('[PROD] dist folder not found. Please build the frontend first: npm run build');
