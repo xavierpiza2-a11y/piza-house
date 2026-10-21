@@ -1,9 +1,9 @@
-FROM node:22-alpine
+FROM oven/bun:1-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Install build essentials for native dependencies if needed
+# Install build essentials for health check and timezone support
 RUN apk add --no-cache curl tzdata
 
 # Set environment variables (Port 5640)
@@ -14,14 +14,14 @@ ENV DATA_DIR=/app/data
 # Copy package descriptors
 COPY package*.json ./
 
-# Install dependencies (including devDependencies required for vite build)
-RUN npm install
+# Install dependencies with Bun
+RUN bun install
 
 # Copy application source files
 COPY . .
 
-# Build the client bundle to /app/dist
-RUN npm run build
+# Build frontend client bundle with Bun to /app/dist
+RUN bun run build
 
 # Create data directories and ensure permissions
 RUN mkdir -p /app/data /app/data/uploads
@@ -36,5 +36,5 @@ VOLUME ["/app/data"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:5640/api/health || exit 1
 
-# Start production server
-CMD ["npm", "run", "start"]
+# Start production server directly with Bun (fast & native TypeScript)
+CMD ["bun", "server.ts"]

@@ -64,9 +64,9 @@ Ce script effectue automatiquement :
 
 ## 🛠️ Stack Technique
 
-- **Serveur & API** : Express 5, Node.js 22, Server-Sent Events (SSE), Multer
+- **Serveur & Runtime** : Bun 1.x (ultra-rapide, exécution native TypeScript), Express 5, Server-Sent Events (SSE), Multer
 - **Frontend** : React 18, TypeScript, Tailwind CSS, Vite
 - **Stockage** : Fichiers JSON thread-safe avec écritures atomiques (fichiers temporaires + renommage)
 - **Authentification** : Gestion interne native par email
 - **Audio & Musique** : Web Audio API synthétiseur & Proxy sécurisé Deezer Music API
-- **Conteneurisation** : Docker, Docker Compose, Port 5640, Volume persistant `./data:/app/data`
+- **Conteneurisation** : Docker (Image officielle Bun `oven/bun:1-alpine`), Docker Compose, Port 5640, Volume persistant `./data:/app/data`

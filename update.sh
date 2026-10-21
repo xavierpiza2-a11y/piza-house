@@ -59,8 +59,8 @@ else
   echo -e "${YELLOW}Dossier .git non détecté. Passage à la recompilation Docker...${NC}"
 fi
 
-# 3. Recompilation et redémarrage du conteneur Docker (sans interruption)
-echo -e "${BLUE}[3/4] Recompilation et redémarrage du conteneur (Port 5640)...${NC}"
+# 3. Recompilation et redémarrage du conteneur Docker avec Bun (sans interruption)
+echo -e "${BLUE}[3/4] Recompilation et redémarrage du conteneur (Runtime Bun · Port 5640)...${NC}"
 $COMPOSE_CMD up -d --build
 
 # Nettoyage des anciennes images inutilisées

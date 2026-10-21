@@ -77,8 +77,8 @@ else
   echo -e "${GREEN}Fichier .env existant conservé.${NC}"
 fi
 
-# 5. Construction et lancement du conteneur Docker
-echo -e "${BLUE}[5/5] Construction de l'image Docker et démarrage sur le port 5640...${NC}"
+# 5. Construction et lancement du conteneur Docker avec Bun
+echo -e "${BLUE}[5/5] Construction de l'image Docker (Runtime Bun) et démarrage sur le port 5640...${NC}"
 $COMPOSE_CMD up -d --build
 
 # Récupération de l'adresse IP locale / publique
