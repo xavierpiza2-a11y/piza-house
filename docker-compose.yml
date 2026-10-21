@@ -1,24 +1,24 @@
 services:
   piza-house:
-  build:
-    context: .
-    dockerfile: Dockerfile
-  container_name: piza-house
-  restart: unless-stopped
-  ports:
-    - "5640:5640"
-  environment:
-    - PORT=5640
-    - NODE_ENV=production
-    - DATA_DIR=/app/data
-    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-    - ADMIN_EMAIL=${ADMIN_EMAIL:-xavier.piza2@gmail.com}
-    - VITE_ADMIN_EMAIL=${VITE_ADMIN_EMAIL:-xavier.piza2@gmail.com}
-  volumes:
-    - ./data:/app/data
-  healthcheck:
-    test: ["CMD", "curl", "-f", "http://localhost:5640/api/health"]
-    interval: 30s
-    timeout: 5s
-    retries: 3
-    start_period: 10s
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: piza-house
+    restart: unless-stopped
+    ports:
+      - "5640:5640"
+    environment:
+      - PORT=5640
+      - NODE_ENV=production
+      - DATA_DIR=/app/data
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-xavier.piza2@gmail.com}
+      - VITE_ADMIN_EMAIL=${VITE_ADMIN_EMAIL:-xavier.piza2@gmail.com}
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5640/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
