@@ -165,21 +165,35 @@ export async function deleteSavedGame(id: string): Promise<boolean> {
 }
 
 // Config & Prompts
-export async function getAppConfig(): Promise<{ config: AppConfig; prompts: Record<string, string> }> {
+export async function getAppConfig(): Promise<{ config: AppConfig; prompts: Record<string, any> }> {
   return readJsonFile(CONFIG_FILE, DEFAULT_CONFIG);
 }
 
-export async function saveAppConfig(newConfig: { config?: Partial<AppConfig>; prompts?: Record<string, string> }): Promise<{ config: AppConfig; prompts: Record<string, string> }> {
+export async function saveAppConfig(newConfig: { config?: Partial<AppConfig>; prompts?: Record<string, any> }): Promise<{ config: AppConfig; prompts: Record<string, any> }> {
   const current = await getAppConfig();
+  const incomingConfig = newConfig.config || {};
+  const incomingPrompts = newConfig.prompts || {};
+
+  const updatedPrompts: Record<string, any> = { ...current.prompts };
+  for (const key of Object.keys(incomingPrompts)) {
+    if (incomingPrompts[key] === null || incomingPrompts[key] === undefined) {
+      delete updatedPrompts[key];
+    } else if (typeof incomingPrompts[key] === 'object' && incomingPrompts[key] !== null) {
+      updatedPrompts[key] = {
+        ...(typeof updatedPrompts[key] === 'object' && updatedPrompts[key] !== null ? updatedPrompts[key] : {}),
+        ...incomingPrompts[key],
+      };
+    } else {
+      updatedPrompts[key] = incomingPrompts[key];
+    }
+  }
+
   const merged = {
     config: {
       ...current.config,
-      ...(newConfig.config || {}),
+      ...incomingConfig,
     },
-    prompts: {
-      ...current.prompts,
-      ...(newConfig.prompts || {}),
-    },
+    prompts: updatedPrompts,
   };
   await atomicWriteJson(CONFIG_FILE, merged);
   return merged;

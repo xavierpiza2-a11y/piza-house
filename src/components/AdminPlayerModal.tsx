@@ -11,9 +11,15 @@ interface AdminPlayerModalProps {
 }
 
 export const AdminPlayerModal: React.FC<AdminPlayerModalProps> = ({ isOpen, onClose, player, onSave }) => {
-  if (!isOpen || !player) return null;
-
-  const [editData, setEditData] = useState<UserProfile>({ ...player });
+  const [editData, setEditData] = useState<UserProfile>(() => player ? { ...player } : {
+    uid: '',
+    name: '',
+    avatar: 'avatar_rockstar',
+    xp: 0,
+    stars: 0,
+    unlockedAvatars: [],
+    badges: [],
+  });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -27,6 +33,8 @@ export const AdminPlayerModal: React.FC<AdminPlayerModalProps> = ({ isOpen, onCl
       });
     }
   }, [player]);
+
+  if (!isOpen || !player) return null;
 
   const lvl = levelFor(editData.xp);
 

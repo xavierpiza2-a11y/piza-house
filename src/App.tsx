@@ -1104,15 +1104,17 @@ export const App: React.FC = () => {
       />
 
       {/* Admin Edit Player Modal */}
-      <AdminPlayerModal
-        isOpen={adminPlayerModalOpen}
-        onClose={() => {
-          setAdminPlayerModalOpen(false);
-          setEditingPlayer(null);
-        }}
-        player={editingPlayer}
-        onSave={handleAdminSavePlayer}
-      />
+      {adminPlayerModalOpen && editingPlayer && (
+        <AdminPlayerModal
+          isOpen={adminPlayerModalOpen}
+          onClose={() => {
+            setAdminPlayerModalOpen(false);
+            setEditingPlayer(null);
+          }}
+          player={editingPlayer}
+          onSave={handleAdminSavePlayer}
+        />
+      )}
     </>
   );
 };

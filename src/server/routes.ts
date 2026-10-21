@@ -333,6 +333,15 @@ apiRouter.get('/config', async (_req: Request, res: Response) => {
   }
 });
 
+apiRouter.get('/config/prompts', async (_req: Request, res: Response) => {
+  try {
+    const full = await getAppConfig();
+    res.json(full.prompts || {});
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get prompts' });
+  }
+});
+
 apiRouter.put('/config', async (req: Request, res: Response) => {
   try {
     const updated = await saveAppConfig(req.body);
@@ -394,4 +403,10 @@ apiRouter.post('/claude', async (req: Request, res: Response) => {
 apiRouter.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', time: Date.now() });
 });
+
+// ── API 404 CATCH-ALL (Guarantees JSON response, avoids HTML fallback) ──
+apiRouter.use((_req: Request, res: Response) => {
+  res.status(404).json({ error: 'Endpoint not found' });
+});
+
 

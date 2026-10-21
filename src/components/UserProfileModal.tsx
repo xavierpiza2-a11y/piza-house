@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { COLORS, DESIGN_AVATARS } from '../lib/constants';
 import { AuthUser, dbSet, uploadUserPhoto, USERS_REF } from '../lib/api';
@@ -18,14 +18,23 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   profile,
   onProfileUpdated,
 }) => {
-  if (!isOpen || !user || !profile) return null;
-
-  const [name, setName] = useState(profile.name || '');
-  const [color, setColor] = useState(profile.color || '#F5C518');
-  const [avatar, setAvatar] = useState(profile.avatar || 'avatar_rockstar');
-  const [photo, setPhoto] = useState(profile.customPhoto || profile.photoURL || '');
+  const [name, setName] = useState(profile?.name || '');
+  const [color, setColor] = useState(profile?.color || '#F5C518');
+  const [avatar, setAvatar] = useState(profile?.avatar || 'avatar_rockstar');
+  const [photo, setPhoto] = useState(profile?.customPhoto || profile?.photoURL || '');
   const [uploading, setUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (profile) {
+      setName(profile.name || '');
+      setColor(profile.color || '#F5C518');
+      setAvatar(profile.avatar || 'avatar_rockstar');
+      setPhoto(profile.customPhoto || profile.photoURL || '');
+    }
+  }, [profile, isOpen]);
+
+  if (!isOpen || !user || !profile) return null;
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

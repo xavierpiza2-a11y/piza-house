@@ -165,15 +165,28 @@ export async function dbGet<T = any>(path: string): Promise<T | null> {
       return map as unknown as T;
     }
 
-    // /app/config
-    if (clean === 'app/config') {
+    // /app/config and nested paths (e.g. app/config/prompts or app/config/prompts/quiz)
+    if (clean === 'app/config' || clean.startsWith('app/config/')) {
       const res = await fetch(`${API_BASE}/config`);
-      return res.ok ? await res.json() : null;
+      if (!res.ok) return null;
+      const full = await res.json();
+      if (clean === 'app/config') {
+        return (full.config || full) as T;
+      }
+      const parts = clean.split('/');
+      let val: any = full;
+      for (let i = 2; i < parts.length; i++) {
+        val = val?.[parts[i]];
+      }
+      return (val !== undefined ? val : null) as T;
     }
 
     // General fallback
     const res = await fetch(`${API_BASE}/${clean}`);
-    return res.ok ? await res.json() : null;
+    if (!res.ok) return null;
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) return null;
+    return await res.json();
   } catch (err) {
     console.error(`[API] dbGet error on ${path}:`, err);
     return null;
@@ -286,12 +299,26 @@ export async function dbSet(path: string, value: any): Promise<void> {
       return;
     }
 
-    // /app/config
-    if (clean === 'app/config') {
+    // /app/config or /app/config/prompts/...
+    if (clean === 'app/config' || clean.startsWith('app/config/')) {
+      const parts = clean.split('/');
+      let payload: any = {};
+      if (parts.length === 2) {
+        payload = { config: value };
+      } else if (parts[2] === 'prompts') {
+        if (parts.length === 3) {
+          payload = { prompts: value };
+        } else {
+          const game = parts[3];
+          payload = { prompts: { [game]: value } };
+        }
+      } else {
+        payload = { config: { [parts[2]]: value } };
+      }
       await fetch(`${API_BASE}/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(value),
+        body: JSON.stringify(payload),
       });
       return;
     }
@@ -316,6 +343,15 @@ export async function dbRemove(path: string): Promise<void> {
     if (clean.startsWith('app/saved/')) {
       const id = clean.split('/')[2];
       await fetch(`${API_BASE}/saved/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      return;
+    }
+    if (clean.startsWith('app/config/prompts/')) {
+      const game = clean.split('/')[3];
+      await fetch(`${API_BASE}/config`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompts: { [game]: null } }),
+      });
       return;
     }
   } catch (err) {
